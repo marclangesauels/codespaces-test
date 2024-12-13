@@ -43,15 +43,16 @@ app.get('/', (req, res) => {
   res.send('Hello remote world!\n');
 });
 
-app.listen(PORT, HOST, async () => {
- const sqlConnetion = await connectToSqlServer();
- sqlConnetion.query('SELECT * FROM users where id = 204', (err, result) => {
-    if (err) {
-      console.error('Error executing query:', err);
-      return;
-    }
-    console.log('Query result:', result.recordset);
+app.get('/users', async (req, res) => {
+  try {
+    const sqlConnetion = await connectToSqlServer();
+    const result = await sqlConnetion.query('SELECT * FROM users');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).send('Error fetching users');
   }
- );
-  console.log(`Running on http://${HOST}:${PORT}`);
 });
+
+app.listen(PORT, HOST);
+console.log(`Running on http://${HOST}:${PORT}`);
